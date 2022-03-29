@@ -1,2 +1,3 @@
-app.controller("ReviewController", function($scope) {
-});
+module.exports = function($scope, $rootScope, $http) {
+
+}

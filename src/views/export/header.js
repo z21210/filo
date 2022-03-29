@@ -1,0 +1,1 @@
+module.exports = require('fs').readFileSync(__dirname+'/../header.html', 'utf8')

@@ -5,23 +5,30 @@ const key = fs.readFileSync(__dirname+'/ssl/key.pem')
 const cert = fs.readFileSync(__dirname+'/ssl/cert.pem')
 const httpPort = 8080
 const httpsPort = 8443
+// HTTP to HTTPS redirect
 const httpRedirect = http.createServer((req, res) => {
 	res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
 	res.end()
 })
 
+// bundle HTML-exporting scripts
+const brfs = require('brfs')
+const toBundle = __dirname+'/../views/export/'
+const bundled  = __dirname+'/../views/bundle/'
+const filesToBundle = fs.readdirSync(toBundle)
+for (filename of filesToBundle) {
+	fs.createReadStream(toBundle+filename).pipe(brfs(toBundle+filename)).pipe(fs.createWriteStream(bundled+filename.split('.').join('.bundle.')))
+}
+
 const express = require('express')
 const app = express()
 app.use(express.urlencoded({ extended: true }));
 
-const mongoose = require('mongoose')
-const mongoUri = 'mongodb://127.0.0.1:27017/filo'
-var db = mongoose.connection
-//db.on
-mongoose.connect(mongoUri)
+require('./routes/api')(app)
+require('./routes/http')(app)
 
-require('../models/routes/http')(app)
-require('../models/routes/api')(app)
+
 
 const httpsServer = https.createServer({key: key, cert: cert}, app)
-httpsServer.listen(8443)
+httpsServer.listen(httpsPort)
+httpRedirect.listen(httpPort)

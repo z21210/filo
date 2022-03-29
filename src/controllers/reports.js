@@ -1,2 +1,3 @@
-app.controller("ReportsController", function($scope) {
-});
+module.exports = function($scope, $rootScope, $http) {
+
+}

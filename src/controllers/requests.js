@@ -1,2 +1,3 @@
-app.controller("RequestsController", function($scope) {
-});
+module.exports = function($scope, $rootScope, $http) {
+
+}

@@ -4,8 +4,21 @@
   "description": "A website for registering/returning lost and found items",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/server/index.js"
+  },
+  "nodemonConfig": {
+    "ignore": ["*.bundle.js"]
   },
   "author": "",
-  "license": "AGPL-3.0-or-later"
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "@uirouter/angularjs": "^1.0.30",
+    "angular": "^1.8.2",
+    "brfs": "^2.0.2",
+    "browserify": "^17.0.0",
+    "express": "^4.17.3",
+    "mongodb": "^4.4.0",
+    "mongoose": "^6.2.4"
+  }
 }
