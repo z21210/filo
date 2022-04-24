@@ -26,7 +26,7 @@ require('./routes/api')(app)
 require('./routes/spa')(app)
 console.log(`running in ${process.env.NODE_ENV} mode`)
 if (process.env.NODE_ENV === 'production') {
-	app.all('*', function(req, res, next) {
+	app.use(function(req, res, next) {
 		console.log(req.headers)
 		if (req.headers.protocol !== 'https') {
 			res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
