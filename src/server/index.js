@@ -4,14 +4,8 @@ const https = require('https')
 const key = fs.readFileSync(__dirname+'/ssl/key.pem')
 const cert = fs.readFileSync(__dirname+'/ssl/cert.pem')
 const httpPort = 8080
-const httpsPort = process.env.NODE_ENV === 'production' ?
-	process.env.PORT || 3000 :
-	8443
-// HTTP to HTTPS redirect
-const httpRedirect = http.createServer((req, res) => {
-	res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
-	res.end()
-})
+const httpsPort = 8443
+const herokuPort = process.env.PORT || 3000;
 
 // bundle HTML-exporting scripts
 const brfs = require('brfs')
@@ -31,6 +25,15 @@ app.use(express.urlencoded({ extended: true }));
 require('./routes/api')(app)
 require('./routes/spa')(app)
 
-const httpsServer = https.createServer({key: key, cert: cert}, app)
-httpsServer.listen(httpsPort)
-httpRedirect.listen(httpPort)
+if (process.env.NODE_ENV === 'production') {
+	const httpServer = http.createServer(app)
+	httpServer.listen(herokuPort)
+} else {
+	const httpsServer = https.createServer({key: key, cert: cert}, app)// HTTP to HTTPS redirect
+	const httpRedirect = http.createServer((req, res) => {
+		res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
+		res.end()
+	})
+	httpsServer.listen(httpsPort)
+	httpRedirect.listen(httpPort)
+}
