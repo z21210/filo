@@ -5,7 +5,7 @@ const key = fs.readFileSync(__dirname+'/ssl/key.pem')
 const cert = fs.readFileSync(__dirname+'/ssl/cert.pem')
 const httpPort = 8080
 const httpsPort = process.env.NODE_ENV === 'production' ?
-	proces.env.PORT || 3000 :
+	process.env.PORT || 3000 :
 	8443
 // HTTP to HTTPS redirect
 const httpRedirect = http.createServer((req, res) => {
