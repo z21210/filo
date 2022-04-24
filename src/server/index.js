@@ -26,6 +26,15 @@ require('./routes/api')(app)
 require('./routes/spa')(app)
 
 if (process.env.NODE_ENV === 'production') {
+	// heroku does https up to their router, always http internally; check 'x-forwarded-proto' header for original request protocol
+	app.use((req, res, next) => {
+		if (req.headers.x-forwarded-proto !== 'https') {
+			res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
+			res.end()
+		} else {
+			next()
+		}
+	})
 	const httpServer = http.createServer(app)
 	httpServer.listen(herokuPort)
 } else {
