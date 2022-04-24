@@ -1,13 +1,13 @@
 <header>
 	<nav>
-		<a href="#" ui-sref="items">Browse lost items</a>
-		<a href="#" ui-sref="login">Log in</a>
-		<a href="#" ui-sref="register">Register</a>
-		<a href="#" ui-sref="newReport">Report lost item</a>
-		<a href="#" ui-sref="reports">My reports</a>
-		<a href="#" ui-sref="requests">My requests</a>
-		<a href="#" ui-sref="review">Review requests</a>
-		<a href="#" ui-sref="account">My account</a>
-		<a href="#" ui-sref="logout">Log out</a>
+		<a ng-if="getUserPrivilege() >= 0" href="#" ui-sref="items">Browse lost items</a>
+		<a ng-if="getUserPrivilege() == 0" href="#" ui-sref="login">Log in</a>
+		<a ng-if="getUserPrivilege() == 0" href="#" ui-sref="register">Register</a>
+		<a ng-if="getUserPrivilege() <= 1" href="#" ui-sref="newReport">Report found item</a>
+		<a ng-if="getUserPrivilege() <= 1" href="#" ui-sref="reports">My reports</a>
+		<a ng-if="getUserPrivilege() <= 1" href="#" ui-sref="requests">My requests</a>
+		<a ng-if="getUserPrivilege() == 2" href="#" ui-sref="review">Review requests</a>
+		<a ng-if="getUserPrivilege() >= 1" href="#" ui-sref="account">My account</a>
+		<a ng-if="getUserPrivilege() >= 1" href="#" ui-sref="logout">Log out</a>
 	</nav>
 </header>

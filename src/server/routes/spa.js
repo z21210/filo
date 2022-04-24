@@ -25,17 +25,30 @@ module.exports = function (app) {
 		res.writeHead(200)
 		fs.createReadStream(__dirname+'/../../../styles/all.css').pipe(res)
 	})
+	// angularjs
+	app.get('/angular.js', function (req, res) {
+		res.set()
+		res.set('Content-Type', 'application/javascript')
+		res.writeHead(200)
+		fs.createReadStream(__dirname+'/../../../node_modules/angular/angular.min.js').pipe(res)
+	})
+	app.get('/angular.min.js.map', function (req, res) {
+		res.set()
+		res.set('Content-Type', 'application/javascript')
+		res.writeHead(200)
+		fs.createReadStream(__dirname+'/../../../node_modules/angular/angular.min.js.map').pipe(res)
+	})
 	// ui-router
 	app.get('/ui-router.js', function (req, res) {
 		res.set()
 		res.set('Content-Type', 'application/javascript')
 		res.writeHead(200)
-		fs.createReadStream(__dirname+'/../../../node_modules/@uirouter/angularjs/release/angular-ui-router.js').pipe(res)
+		fs.createReadStream(__dirname+'/../../../node_modules/@uirouter/angularjs/release/angular-ui-router.min.js').pipe(res)
 	})
-	app.get('/angular-ui-router.js.map', function (req, res) {
+	app.get('/angular-ui-router.min.js.map', function (req, res) {
 		res.set()
 		res.set('Content-Type', 'application/json')
 		res.writeHead(200)
-		fs.createReadStream(__dirname+'/../../../node_modules/@uirouter/angularjs/release/angular-ui-router.js.map').pipe(res)
+		fs.createReadStream(__dirname+'/../../../node_modules/@uirouter/angularjs/release/angular-ui-router.min.js.map').pipe(res)
 	})
 }

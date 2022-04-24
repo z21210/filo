@@ -1,0 +1,11 @@
+<form ng-submit="login()">
+	<label for="username">Username:</label>
+	<input id="username" type="text" ng-model="user.username">
+
+	<label for="password">Password:</label>
+	<input id="password" type="password" ng-model="user.password">
+
+	<label></label>
+	<button type="submit">Log in</button>
+</form>
+{{loginError}}

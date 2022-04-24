@@ -1,5 +1,5 @@
-const User = require('../../models/user')
-const Item = require('../../models/item')
+const User = require('../../../models/user')
+const Item = require('../../../models/item')
 
 module.exports = function (request, success, error) {
 	if (request.itemId === undefined || request.userId === undefined) {
@@ -12,7 +12,7 @@ module.exports = function (request, success, error) {
 			return
 		}
 		if (result[0] === undefined) {
-			error(new Error(`user of userId ${request.userId} not found`))
+			error(new Error(`user of userId '${request.userId}' not found`))
 			return
 		}
 		Item.find({_id: request.itemId}, function (err, result) {
@@ -21,7 +21,7 @@ module.exports = function (request, success, error) {
 				return
 			}
 			if (result[0] === undefined) {
-				error(new Error(`item of itemId ${request.itemId} not found`))
+				error(new Error(`item of itemId '${request.itemId}' not found`))
 				return
 			}
 			success()

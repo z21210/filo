@@ -17,7 +17,9 @@ const toBundle = __dirname+'/../views/export/'
 const bundled  = __dirname+'/../views/bundle/'
 const filesToBundle = fs.readdirSync(toBundle)
 for (filename of filesToBundle) {
-	fs.createReadStream(toBundle+filename).pipe(brfs(toBundle+filename)).pipe(fs.createWriteStream(bundled+filename.split('.').join('.bundle.')))
+	fs.createReadStream(toBundle+filename)
+	.pipe(brfs(toBundle+filename))
+	.pipe(fs.createWriteStream(bundled+filename))
 }
 
 const express = require('express')
@@ -25,9 +27,7 @@ const app = express()
 app.use(express.urlencoded({ extended: true }));
 
 require('./routes/api')(app)
-require('./routes/http')(app)
-
-
+require('./routes/spa')(app)
 
 const httpsServer = https.createServer({key: key, cert: cert}, app)
 httpsServer.listen(httpsPort)

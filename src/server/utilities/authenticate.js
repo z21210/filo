@@ -1,4 +1,11 @@
-const User = require('../models/user')
+/*
+authenticate
+	transitive verb
+		to establish the authenticity of; prove genuine: synonym: confirm.
+"Is this user really who they claim to be?"
+*/
+
+const User = require('../../models/user')
 const crypto = require('crypto')
 module.exports = function (headers, error, success) {
 	if (headers.authorization === undefined) {
@@ -17,12 +24,12 @@ module.exports = function (headers, error, success) {
 			return
 		}
 		if (result.length == 0) { // user not found
-			error(new Error(`user ${username} not found`))
+			error(new Error(`user '${username}' not found`))
 			return
 		}
 		const user = result[0]
 		if (user.password === undefined || user.passwordSalt === undefined) {
-			error(new Error('User\'s entry is incomplete'))
+			error(new Error(`User '${username}''s entry is incomplete`))
 			return
 		}
 		const hash = crypto.createHmac('SHA256', Buffer.from(user.passwordSalt, 'hex')).update(password).digest('hex') // check password

@@ -15499,12 +15499,16 @@ const commonPasswords = new Map([ // sourced from https://github.com/danielmiess
 ])
 
 module.exports = function (password, success, error) {
+	if (password === undefined) {
+		success(password)
+		return
+	}
   if (password.length < MINIMUM_LENGTH) {
-		error(new Error(`Passphrase '${password}' is too short`))
+		error(new Error(`Passphrase is too short. Minimum of ${MINIMUM_LENGTH} characters.`))
 		return
 	}
 	if (commonPasswords.get(password) === true) {
-		error(new Error(`Passphrase '${password}' is too common`))
+		error(new Error(`Passphrase is too common`))
 		return
 	}
 

@@ -1,0 +1,1 @@
+module.exports = "Are you sure you want to log out?<br>\n<button ng-click=\"no()\">No</button> \n<button ng-click=\"yes()\">Yes</button>"

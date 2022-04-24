@@ -1,0 +1,20 @@
+<div ng-repeat="report in reports">
+	<div>
+		<h2>{{report.name}}</h2>
+		<div class="gallery">
+			<img ng-repeat="image in report.image" src="{{image}}" style="display:inline-block;" onclick="window.open(this.src, '_blank');"><br>
+		</div>
+		Category: {{report.category}}<br>
+		Found: {{report.locationFound}} - {{report.dateFound}}<br>
+		Listed: {{report.dateListed}}<br>
+		<br>
+		{{report.description}}<br>
+	</div>
+	<div style="float: left;">
+		Status: {{report.status}}<br>
+		<div ng-show="report.status === 'request approved'">
+			Please contact {{report.contact.username}} at {{report.contact.email}}
+		</div>
+	</div>
+	<br>
+</div>

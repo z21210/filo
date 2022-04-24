@@ -1,0 +1,47 @@
+<h2>{{user.username}}</h2><br>
+
+<div style="float: left;" ng-init="form = ''">
+	<button ng-click="form = 'password'">Change password</button><br> 
+	<button ng-click="form = 'email'">Change e-mail address</button><br>
+	<button ng-click="form = 'username'">Change username</button> 
+</div>
+
+<!-- ng-if is used instead of ng-show to prevent the Enter key submitting hidden forms --> 
+<div style="float: left;" ng-if="form == 'password'" ng-init="$parent.changePasswordMessage = ''">
+	<form ng-submit="changePassword()">
+		<label for="newPassword">New password:</label>
+		<input id="newPassword" type="password" ng-model="new.password" ng-init="$parent.new.password = ''">
+
+		<label for="confirmNewPassword">Confirm new password:</label>
+		<input id="confirmNewPassword" type="password" ng-model="new.confirmPassword" ng-init="$parent.new.confirmPassword = ''">
+
+		<button type="button" ng-click="$parent.form = ''">Cancel</button>
+		<button type="submit">Change password</button>
+	</form>
+	<span>{{changePasswordMessage}}</span>
+</div>
+
+<div style="float: left;" ng-if="form == 'email'" ng-init="$parent.changeEmailMessage = ''">
+	<form ng-submit="changeEmail()">
+		<label for="newEmail">New e-mail address:</label>
+		<input id="newEmail" type="text" ng-model="new.email" ng-init="$parent.new.email = ''">
+
+		<label for="confirmNewEmail">Confirm new e-mail address:</label>
+		<input id="confirmNewEmail" type="text" ng-model="new.confirmEmail" ng-init="$parent.new.confirmEmail = ''">
+
+		<button type="button" ng-click="$parent.form = ''">Cancel</button>
+		<button type="submit">Change e-mail address</button>
+	</form>
+	<span>{{changeEmailMessage}}</span>
+</div>
+
+<div style="float: left;" ng-if="form == 'username'" ng-init="$parent.changeUsernameMessage = ''">
+	<form ng-submit="changeUsername()">
+		<label for="newUsername">New username:</label>
+		<input id="newUsername" type="text" ng-model="new.username" ng-init="$parent.new.username = ''">
+
+		<button type="button" ng-click="$parent.form = ''">Cancel</button>
+		<button type="submit">Change username</button>
+	</form>
+	<span>{{changeUsernameMessage}}</span>
+</div>

@@ -1,36 +1,93 @@
 const mongoose = require('mongoose')
-const mongoUri = 'mongodb://127.0.0.1:27017/filo'
+const mongoUri = process.env.NODE_ENV === 'production' ? 
+	'mongodb+srv://admin:Jvo483tMKShzcfvRdtiFe54gN7p64KXP@cluster0.cd0vw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority' :
+	'mongodb://127.0.0.1:27017/filo'
 mongoose.connect(mongoUri)
 
-const User = require('../../models/models/user')
-const Item = require('../../models/models/item')
-const Request = require('../../models/models/request')
-const auth = require('../../models/utilities/auth')
+const User = require('../../models/user')
+const Item = require('../../models/item')
+const Request = require('../../models/request')
+const auth = require('../utilities/auth')
 
 module.exports = function (app) {
 
 	app.put('/api/register', function (req, res) {
-		auth(req, res, function (req, res) {
+		auth(req, res, function () {
 			var buffer = ''
 			req.on('data', (data) => buffer = buffer + data)
-			req.on('end', () => {
-				authorise('put:register', function (err) {
-					res.writeHead(500)
+			req.on('end', function () {
+				try {
+					buffer = JSON.parse(buffer)
+				} catch (err) {
+					res.writeHead(400)
 					res.write(err.toString())
 					res.end()
-				}, 
-				function () {
-					user = new User(JSON.parse(buffer))
-					user.save(function (err, result) {
-						if (err) {
-							res.writeHead(400)
-							res.write(err.toString())
-							res.end()
-						} else {
-							res.writeHead(204)
-							res.end()
-						}
-					})
+					return
+				}
+				buffer.admin = false
+				user = new User(buffer)
+				user.save(function (err, result) {
+					if (err) {
+						res.writeHead(400)
+						res.write(err.toString())
+						res.end()
+					} else {
+						res.writeHead(204)
+						res.end()
+					}
+				})
+			})
+		})
+	})
+	app.put('/api/login', function (req, res) {
+		auth(req, res, function () {
+			var buffer = ''
+			req.on('data', (data) => buffer = buffer + data)
+			req.on('end', function () {
+				User.findOne({username: buffer}, function (err, result) {
+					if (err) {
+						res.writeHead(500)
+						res.end()
+						return
+					}
+					if (result == []) {
+						res.writeHead(404)
+						res.end()
+						return
+					}
+					res.send(result.admin)
+				})
+			})
+		})
+	})
+	app.put('/api/account', function (req, res) {
+		auth(req, res, function () {
+			var buffer = ''
+			req.on('data', (data) => buffer = buffer + data)
+			req.on('end', function () {
+				const auth = Buffer.from(req.headers.authorization.slice(6), 'base64').toString()
+				const username = auth.slice(0,auth.indexOf(':'))
+				try {
+					update = JSON.parse(buffer)
+				} catch (err) {
+					res.writeHead(400)
+					res.write(err.toString())
+					res.end()
+					return
+				}
+				User.findOneAndUpdate({username}, update, function (err, result) {
+					if (err) {
+						res.writeHead(500)
+						res.write(err.toString())
+						res.end()
+						return
+					}
+					if (result == []) {
+						res.writeHead(404)
+						res.end()
+						return
+					}
+					res.send()
 				})
 			})
 		})
@@ -38,30 +95,99 @@ module.exports = function (app) {
 
 	app.get('/api/items', function (req, res) {
 		auth(req, res, function() {
-			Item.find(function (err, result) {
+			Item.find({}, {
+				_id: true,
+				name: true, 
+				category: true, 
+				locationFound: true, 
+				dateFound: true, 
+				dateListed: true
+			}, 
+			function (err, result) {
 				if (err) {
 					res.writeHead(500)
 					res.end()
 					return
 				}
-				items = result.map((item) => { 
-					return {
-						_id: item._id,
-						name: item.name, 
-						category: item.category, 
-						locationFound: item.locationFound, 
-						dateFound: item.dateFound, 
-						dateListed: item.dateListed
+				res.send(result)
+			})
+		})
+	})
+
+	app.get('/api/reports', function (req, res) {
+		auth(req, res, function() {
+			const auth = Buffer.from(req.headers.authorization.slice(6), 'base64').toString()
+			const username = auth.slice(0,auth.indexOf(':'))
+			User.findOne({username}, function (err, result) {
+				if (err) {
+					res.writeHead(500)
+					res.write(err.toString())
+					res.end()
+					return
+				}
+				// get items this user has reported
+				const userId = result._id
+				Item.find({reportedBy: userId}).lean().exec(function (err, result) {
+					if (err) {
+						res.writeHead(500)
+						res.write(err.toString())
+						res.end()
+						return
 					}
+					// get requests for these items (note: below, "requested" means "requested and approved" or "requested and awaiting review", excludes "requested and denied")
+					items = result
+					const itemIds = items.map(item => (item._id))
+					Request.find({
+						$and: [
+							{itemId: 
+								{$in: itemIds}
+							},
+							{$or: [
+								{reviewed: false},
+								{reviewed: true, approved: true}
+							]}
+						]
+					}, {_id: false, itemId: true, approved: true, userId: true}).populate({path: 'userId', select: 'username email'}).exec(
+					function(err, result) {
+						//console.log(result[0].userId)
+						const requestedItemIds = new Set(
+							result.map(request => 
+								request.itemId.toString()
+							)
+						)
+						const approvedItemIds = new Set(
+							result.filter((request) => 
+								request.approved
+							)
+							.map(request => 
+								request.itemId.toString()
+							)
+						)
+						// status is determined server-side, because the user is not privy to if / how many requests there are
+						items.forEach((item, i) => {
+							let status
+							let contact
+							if (requestedItemIds.has(item._id.toString())) {
+								if (approvedItemIds.has(item._id.toString())) {
+									status = 'request approved'
+									contact = result.find((request) => request.itemId.toString() === item._id.toString()).userId
+								} else {
+									status = 'request awaiting review'
+								}
+							} else {
+								status = 'awaiting request'
+							}
+							Object.assign(items[i], {status, contact})
+						})
+						res.send(items)
+					})
 				})
-				res.send(items)
 			})
 		})
 	})
 
 	app.get('/api/item/:itemId', function (req, res) {
-		auth(req, res, function (req, res) {
-			console.log(Buffer.from(req.headers.authorization.slice(6), 'base64').toString())
+		auth(req, res, function () {
 			const itemId = req.params.itemId
 			Item.find({_id: itemId}, function (err, result) {
 				if (err) {
@@ -83,42 +209,145 @@ module.exports = function (app) {
 		})
 	})
 
+	app.delete('/api/item/:itemId', function (req, res) {
+		auth(req, res, function () {
+			const itemId = req.params.itemId
+			//delete all requests for this item
+			Request.deleteMany({itemId}, function (err, result) {
+				if (err) {
+					res.writeHead(500)
+					res.end()
+					return
+				}
+				//delete the item
+				Item.deleteOne({_id: itemId}, function (err, result) {
+					if (err) {
+						if (err.reason == 'BSONTypeError: Argument passed in must be a string of 12 bytes or a string of 24 hex characters') {
+							res.writeHead(400)
+							res.end()
+							return
+						}
+						res.writeHead(500)
+						res.end()
+						return
+					}
+					res.writeHead(204)
+					res.end()
+				})
+			})
+		})
+	})
+
 	app.post('/api/item', function (req, res) {
-		auth(req, res, function (req, res) {
+		auth(req, res, function () {
 			var buffer = ''
 			req.on('data', (data) => buffer = buffer + data)
 			req.on('end', () => {
-				item = new Item(JSON.parse(buffer))
-				item.save(function (err, result) {
+				const auth = Buffer.from(req.headers.authorization.slice(6), 'base64').toString()
+				const username = auth.slice(0,auth.indexOf(':'))
+				try {
+					buffer = JSON.parse(buffer)
+				} catch (err) {
+					res.writeHead(400)
+					res.write(err.toString())
+					res.end()
+					return
+				}
+				User.findOne({username}, function (err, result) {
 					if (err) {
 						res.writeHead(500)
 						res.write(err.toString())
 						res.end()
 					} else {
-						console.log(result)
-						res.writeHead(204)
-						res.end()
+						buffer.reportedBy = result._id
+						item = new Item(buffer)
+						item.save(function (err, result) {
+							if (err) {
+								res.writeHead(500)
+								res.write(err.toString())
+								res.end()
+							} else {
+								res.writeHead(204)
+								res.end()
+							}
+						})
 					}
 				})
 			})
 		})
 	})
 
-	app.put('/api/request', function (req, res) {
-		auth(req, res, function (req, res) {
+	app.put('/api/item/:itemId', function (req, res) {
+		auth(req, res, function () {
 			var buffer = ''
 			req.on('data', (data) => buffer = buffer + data)
 			req.on('end', () => {
-				request = new Request(JSON.parse(buffer))
-				request.save(function (err, result) {
+				try {
+					update = JSON.parse(buffer)
+				} catch (err) {
+					res.writeHead(400)
+					res.write(err.toString())
+					res.end()
+					return
+				}
+				const itemId = req.params.itemId
+				Item.findOneAndUpdate({_id: itemId}, update, function (err, result) {
+					if (err) {
+						res.writeHead(500)
+						res.write(err.toString())
+						res.end()
+						return
+					}
+					if (result == []) {
+						res.writeHead(404)
+						res.end()
+						return
+					}
+					res.send(result)
+				})
+			})
+		})
+	})
+
+	app.put('/api/request', function (req, res) {
+		auth(req, res, function () {
+			var buffer = ''
+			req.on('data', (data) => buffer = buffer + data)
+			req.on('end', () => {
+				const auth = Buffer.from(req.headers.authorization.slice(6), 'base64').toString()
+				const username = auth.slice(0,auth.indexOf(':'))
+				User.findOne({username}, function (err, result) {
 					if (err) {
 						res.writeHead(500)
 						res.write(err.toString())
 						res.end()
 					} else {
-						console.log(result)
-						res.writeHead(204)
-						res.end()
+						try {
+							buffer = JSON.parse(buffer)
+						} catch (err) {
+							res.writeHead(400)
+							res.write(err.toString())
+							res.end()
+							return
+						}
+						buffer.reviewed = false
+						buffer.approved = false
+						buffer.userId = result._id
+						request = new Request(buffer)
+						request.save(function (err, result) {
+							if (err) {
+								res.writeHead(500)
+								if (err.code == 11000) {
+									res.write('You have already requested this item')
+								} else {
+									res.write(err.toString())
+								}
+								res.end()
+							} else {
+								res.writeHead(204)
+								res.end()
+							}
+						})
 					}
 				})
 			})
@@ -126,28 +355,38 @@ module.exports = function (app) {
 	})
 
 	app.get('/api/requests', function (req, res) {
-		auth(req, res, function (req, res) {
-			Request.find(function (err, result) {
+		auth(req, res, function () {
+			const auth = Buffer.from(req.headers.authorization.slice(6), 'base64').toString()
+			const username = auth.slice(0,auth.indexOf(':'))
+			User.findOne({username}, function (err, result) {
 				if (err) {
 					res.writeHead(500)
+					res.write(err.toString())
 					res.end()
 					return
 				}
-				res.send(result)
-			})
-		})
-	})
-	
-	app.get('/api/request/:requestId', function (req, res) {
-		auth(req, res, function (req, res) {
-			const requestId = req.params.requestId
-			Request.find({_id: requestId}, function (err, result) {
-				if (err) {
-					if (err.reason == 'BSONTypeError: Argument passed in must be a string of 12 bytes or a string of 24 hex characters') {
-						res.writeHead(400)
+				Request.find({userId: result._id}).populate({path:'itemId', populate:{path:'reportedBy', select:'username email'}}).exec(function (err, result) {
+					if (err) {
+						res.writeHead(500)
+						res.write(err.toString())
 						res.end()
 						return
 					}
+					result.forEach((request, i) => {
+						if (!(request.reviewed && request.approved)) {
+							Object.assign(result[i].itemId.reportedBy, {_id: '', username:'', email:''})
+						}
+					})
+					res.send(result)
+				})
+			})
+		})
+	})
+
+	app.get('/api/review', function (req, res) {
+		auth(req, res, function () {
+			Request.find().populate('itemId').populate({path:'userId', select: 'username'}).exec(function (err, result) {
+				if (err) {
 					res.writeHead(500)
 					res.end()
 					return
@@ -158,12 +397,19 @@ module.exports = function (app) {
 	})
 
 	app.put('/api/review/:requestId', function (req, res) {
-		auth(req, res, function (req, res) {
+		auth(req, res, function () {
 			const requestId = req.params.requestId
 			var buffer = ''
 			req.on('data', (data) => buffer = buffer + data)
 			req.on('end', () => {
-				const review = JSON.parse(buffer)
+				try {
+					review = JSON.parse(buffer)
+				} catch (err) {
+					res.writeHead(400)
+					res.write(err.toString())
+					res.end()
+					return
+				}
 				Request.updateOne({_id: requestId}, { $set: {
 					reviewed: true,
 					approved: review.approved
@@ -175,7 +421,7 @@ module.exports = function (app) {
 						res.end()
 						return
 					}
-					res.writeHead(204)
+					res.writeHead(200)
 					res.end()
 				})
 			})

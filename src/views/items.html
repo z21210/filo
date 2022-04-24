@@ -1,0 +1,114 @@
+<div style="float: left;" ng-init="itemsMessage = null">
+	{{itemsMessage}}
+</div>
+<table style="float: left;">
+	<thead>
+		<tr>
+			<th ng-click="sortBy('name')">Item
+				<b ng-show="sort.by == 'name'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('category')">Category
+				<b ng-show="sort.by == 'category'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('dateFound')">Date found
+				<b ng-show="sort.by == 'dateFound'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('locationFound')">Location found
+				<b ng-show="sort.by == 'locationFound'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('dateListed')">Date listed
+				<b ng-show="sort.by == 'dateListed'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr style="cursor: pointer;" ng-repeat="item in items | orderBy:sort.by:sort.descending" ng-click="selectItem(item._id)">
+			<td>{{ item.name }}</td>
+			<td>{{ item.category }}</td>
+			<td>{{ item.dateFound }}</td>
+			<td>{{ item.locationFound }}</td>
+			<td>{{ item.dateListed }}</td>
+		</tr>	
+	</tbody>
+</table>
+<button style="float: left;" ng-click="refresh()">Refresh</button>
+
+<!-- Item details -->
+<div style="float: left;" ng-show="selectedItemId">
+	<div ng-init="itemMessage = null">{{itemMessage}}</div>
+	<h2>{{selectedItem.name}}</h2>
+	<div class="gallery">
+		<img ng-repeat="image in selectedItem.image" src="{{image}}" style="display:inline-block;" onclick="window.open(this.src, '_blank');"><br>
+	</div>
+	Category: {{selectedItem.category}}<br>
+	Found: {{selectedItem.locationFound}} - {{selectedItem.dateFound}}<br>
+	Listed: {{selectedItem.dateListed}}<br>
+	<br>
+	{{selectedItem.description}}<br>
+	<br>
+
+	<!-- Request item form -->
+	<form ng-show="getUserPrivilege() == 1" ng-submit="requestItem()">
+		<label>Request Item</label>
+		<label></label>
+
+		<label for="reason">Reason: </label>
+		<textarea id="reason" type="text" ng-model="reason" rows="10" cols="80">
+		</textarea>
+
+		<button type="submit">Submit request</button>
+	</form>
+
+	<!-- Edit item form -->
+	<button ng-show="getUserPrivilege() == 2 && !editedItem" ng-click="openEditItemForm()">Edit item</button>
+	<button ng-show="getUserPrivilege() == 2 && editedItem" ng-click="editedItem = null">Cancel</button>
+	<form ng-show="editedItem" ng-submit="editItem()">
+		<label>Edit Item</label>
+		<label></label>
+
+		<label for="name">Name: </label>
+		<input id="name" type="text" ng-model="editedItem.name">
+
+		<label for="category">Category: </label> 
+		<select id="category" ng-model="editedItem.category">
+			<option value="pet">Pet</option>
+			<option value="phone">Phone</option>
+			<option value="other">Other</option>
+		</select>
+
+		<label for="dateFound">Date found: </label>
+		<input id="dateFound" type="date" ng-model="editedItem.dateFound">
+
+		<label for="locationFound">Location found: </label>
+		<input id="locationFound" type="text" ng-model="editedItem.locationFound">
+
+		<label for="description">Description: </label>
+		<input id="description" type="text" ng-model="editedItem.description">
+
+		<label for="image">Select image: </label>
+		<input id="image" type="file" accept="image/*" multiple>
+
+		<label for="imagePreview">Image preview (click to remove): </label>
+		<div class="gallery">
+			<img ng-repeat="image in editedItem.image" src="{{image}}" id="imagePreview" ng-click="removeImage($index)">
+		</div>
+
+		<button type="button" ng-click="deleteItem()">{{ deleteItemButton }}</button>
+		<button type="submit">Edit item</button>
+	</form>
+</div>

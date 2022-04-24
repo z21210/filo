@@ -1,0 +1,31 @@
+<form ng-submit="createReport()">
+	<label for="name">Name: </label>
+	<input id="name" type="text" ng-model="report.name">
+
+	<label for="category">Category: </label> 
+	<select id="category" ng-model="report.category">
+		<option value="pet">Pet</option>
+		<option value="phone">Phone</option>
+		<option value="other">Other</option>
+	</select>
+
+	<label for="dateFound">Date found: </label>
+	<input id="dateFound" type="date" ng-model="report.dateFound">
+
+	<label for="locationFound">Location found: </label>
+	<input id="locationFound" type="text" ng-model="report.locationFound">
+
+	<label for="description">Description: </label>
+	<input id="description" type="text" ng-model="report.description">
+
+	<label for="image">Select image: </label>
+	<input id="image" type="file" accept="image/*" multiple>
+
+	<label for="imagePreview">Image preview (click to remove): </label>
+	<div class="gallery">
+		<img ng-repeat="image in report.image" src="{{image}}" id="imagePreview" ng-click="removeImage($index)">
+	</div>
+
+	<label></label>
+	<button id="report" type="submit">Report item</button>
+</form>

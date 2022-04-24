@@ -1,0 +1,73 @@
+<table style="float: left;">
+	<thead>
+		<tr>
+			<th ng-click="sortBy('itemId.name')">Item
+				<b ng-show="sort.by == 'itemId.name'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('userId.username')">User
+				<b ng-show="sort.by == 'userId.username'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('itemId.dateListed')">Date listed
+				<b ng-show="sort.by == 'itemId.dateListed'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('itemId.dateRequested')">Date requested
+				<b ng-show="sort.by == 'itemId.dateRequested'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+			<th ng-click="sortBy('status')">Status
+				<b ng-show="sort.by == 'status'">
+					<b ng-show="!sort.descending">&#8679;</b>
+					<b ng-show="sort.descending">&#8681;</b>
+				</b>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr style="cursor: pointer;" ng-repeat="request in requests | orderBy:sort.by:sort.descending" ng-click="selectRequest(request._id)">
+			<td>{{ request.itemId.name }}</td>
+			<td>{{ request.userId.username }}</td>
+			<td>{{ request.itemId.dateListed }}</td>
+			<td>{{ request.dateRequested }}</td>
+			<td>{{ request.status }}</td>
+		</tr>	
+	</tbody>
+</table>
+
+<div style="float: left;" ng-show="selectedRequest != null">
+	<h2>{{selectedRequest.itemId.name}}</h2>
+	<div class="gallery">
+		<img ng-repeat="image in selectedRequest.itemId.image" src="{{image}}" style="display:inline-block;" onclick="window.open(this.src, '_blank');"><br>
+	</div>
+	Category: {{selectedRequest.itemId.category}}<br>
+	Found: {{selectedRequest.itemId.locationFound}} - {{selectedRequest.itemId.dateFound}}<br>
+	Listed: {{selectedRequest.itemId.dateListed}}<br>
+	<br>
+	{{selectedRequest.itemId.description}}<br>
+	<br>
+	<button ng-click="goToItem()">Go to item</button>
+	<h2>Request</h2>
+	User: {{selectedRequest.userId.username}}<br>
+	Reason: {{selectedRequest.reason}}<br>
+	Date requested: {{selectedRequest.dateRequested}}<br>
+	Status: {{selectedRequest.status}}<br>
+	<br>
+	<div ng-show="selectedRequest.status == 'awaiting review'">
+		<h2>Review request</h2>
+		<form>
+			<button ng-click="approve()">Approve request</button>
+			<button ng-click="deny()">Deny request</button>
+		</form>
+		{{reviewedMessage}}
+	</div>
+</div>

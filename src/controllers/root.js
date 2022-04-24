@@ -1,117 +1,132 @@
 app = angular.module('filo', ['ui.router'])
 
-app.controller('rootController', function ($scope) {})
+app.controller('rootController', function ($rootScope){
+	$rootScope.getUserPrivilege = function () {
+		if (!$rootScope.user || !$rootScope.user.username) return 0
+		if (!$rootScope.user.isAdmin) return 1
+		if ($rootScope.user.isAdmin) return 2
+	}
+})
+
+app.run(['$rootScope', '$state', 
+	function ($rootScope, $state) {
+		$rootScope.$state = $state
+	}
+])
 
 app.config(function ($stateProvider, $urlRouterProvider) {
 	// landing page
 	$urlRouterProvider.otherwise("/items");
 	var header = {
-		template: require('../views/bundle/header.bundle'),
+		template: require('../views/bundle/header'),
 		controller: require('./header')
-	}
-	var footer = {
-		template: '',
-		controller: function($scope) {}
 	}
 	// ui router states
 	$stateProvider
 		.state('items', {
 			url: '/items',
+			title: 'Items',
+			params: {
+				itemId: undefined,
+			},
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/items.bundle'),
+					template: require('../views/bundle/items'),
 					controller: require('./items')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('login', {
-			url: '/login',
+			url: '/login?accessing&params',
+			title: 'Log in',
+			params: {
+				accessing: 'items', //default
+				params: '{}'
+			},
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/login.bundle'),
+					template: require('../views/bundle/login'),
 					controller: require('./login')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('register', {
 			url: '/register',
+			title: 'Register account',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/register.bundle'),
+					template: require('../views/bundle/register'),
 					controller: require('./register')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('newReport', {
 			url: '/newReport',
+			title: 'Report lost item',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/newReport.bundle'),
+					template: require('../views/bundle/newReport'),
 					controller: require('./newReport')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('reports', {
 			url: '/reports',
+			title: 'My reported items',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/reports.bundle'),
+					template: require('../views/bundle/reports'),
 					controller: require('./reports')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('requests', {
 			url: '/requests',
+			title: 'My requested items',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/requests.bundle'),
+					template: require('../views/bundle/requests'),
 					controller: require('./requests')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('review', {
 			url: '/review',
+			title: 'Review requests',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/review.bundle'),
+					template: require('../views/bundle/review'),
 					controller: require('./review')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('account', {
 			url: '/account',
+			title: 'Account',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/account.bundle'),
+					template: require('../views/bundle/account'),
 					controller: require('./account')
-				},
-				footer: footer
+				}
 			}
 		})
 		.state('logout', {
 			url: '/logout',
+			title: 'Log out',
 			views: {
 				header: header,
 				content: {
-					template: require('../views/bundle/logout.bundle'),
+					template: require('../views/bundle/logout'),
 					controller: require('./logout')
-				},
-				footer: footer
+				}
 			}
 		});
 })

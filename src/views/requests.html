@@ -1,0 +1,21 @@
+<div ng-repeat="request in requests">
+	<div>
+		<h2>{{request.itemId.name}}</h2>
+		<div class="gallery">
+			<img ng-repeat="image in request.itemId.image" src="{{image}}" style="display:inline-block;" onclick="window.open(this.src, '_blank');"><br>
+		</div>
+		Category: {{request.itemId.category}}<br>
+		Found: {{request.itemId.locationFound}} - {{request.itemId.dateFound}}<br>
+		Listed: {{request.itemId.dateListed}}<br>
+		Description: {{request.itemId.description}}<br>
+		<br>
+		Your request:<br>
+		Reason: {{request.reason}}<br>
+		Date: {{request.dateRequested}}<br>
+		Status: {{request.status}}<br>
+		<div ng-show="request.status == 'request approved'">
+			Please contact {{request.itemId.reportedBy.username}} at {{request.itemId.reportedBy.email}}
+		</div>
+	</div>
+	<br>
+</div>

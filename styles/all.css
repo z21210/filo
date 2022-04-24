@@ -1,0 +1,42 @@
+/* forms */
+form {
+	display: grid;
+	grid-template-columns: max-content max-content;
+	grid-gap: 5px;
+}
+form label { 
+	text-align: right;
+}
+
+/* tables */
+table {
+	border-collapse: collapse;
+}
+thead tr {
+	border-style: solid;
+}
+tbody tr {
+	border-style: inset;
+}
+tr th {
+	border-left-style: solid;
+	border-right-style: solid;
+}
+tr td {
+	border-left-style: dotted;
+	border-right-style: dotted;
+} 
+tr td:first-child, tr td:last-child {
+	border-style: inset;
+}
+
+div.gallery {
+	display: grid;
+	grid-template-columns: max-content max-content;
+	grid-template-rows: max-content max-content;
+	grid-gap: 5px;
+}
+div.gallery > img {
+	height: 100px;
+	cursor: pointer;
+}

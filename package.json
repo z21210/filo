@@ -8,7 +8,8 @@
     "start": "nodemon src/server/index.js"
   },
   "nodemonConfig": {
-    "ignore": ["*.bundle.js"]
+    "ignore": ["./src/views/bundle/"],
+    "ext":"js,html"
   },
   "author": "",
   "license": "AGPL-3.0-or-later",
