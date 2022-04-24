@@ -27,7 +27,7 @@ require('./routes/spa')(app)
 
 if (process.env.NODE_ENV === 'production') {
 	app.all('*', function(req, res, next) {
-		if (req.headers['x-forwarded-proto'] !== 'https') {
+		if (req.headers.forwarded.proto !== 'https') {
 			res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
 			res.end()
 		} else {
