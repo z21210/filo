@@ -22,24 +22,24 @@ const express = require('express')
 const app = express()
 app.use(express.urlencoded({ extended: true }));
 
-app.use(function (req, res, next) {
-	console.log(req.headers)
-	if (req.headers.protocol !== 'https') {
-		res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
-		res.end()
-	} else {
-		next()
-	}
-})
-
-require('./routes/api')(app)
-require('./routes/spa')(app)
 console.log(`running in ${process.env.NODE_ENV} mode`)
 if (process.env.NODE_ENV === 'production') {
-	
+	app.use(function (req, res, next) {
+		console.log(req.headers)
+		if (req.headers['x-forwarded-proto'] !== 'https') {
+			res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
+			res.end()
+		} else {
+			next()
+		}
+	})
+	require('./routes/api')(app)
+	require('./routes/spa')(app)
 	const httpServer = http.createServer(app)
 	httpServer.listen(herokuPort)
 } else {
+	require('./routes/api')(app)
+	require('./routes/spa')(app)
 	const httpsServer = https.createServer({key: key, cert: cert}, app)// HTTP to HTTPS redirect
 	const httpRedirect = http.createServer((req, res) => {
 		res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
