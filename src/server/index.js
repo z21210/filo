@@ -25,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 console.log(`running in ${process.env.NODE_ENV} mode`)
 if (process.env.NODE_ENV === 'production') {
 	app.use(function (req, res, next) {
-		console.log(req.headers)
 		if (req.headers['x-forwarded-proto'] !== 'https') {
 			res.writeHead(308, {location: 'https://'+req.headers.host+req.url})
 			res.end()
